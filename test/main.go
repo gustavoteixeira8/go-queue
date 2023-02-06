@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"sync"
-	"time"
 
 	"github.com/go-redis/redis"
 	queue "github.com/gustavoteixeira8/go-queue"
@@ -61,7 +60,6 @@ func RunMailQueue(wg *sync.WaitGroup) {
 
 	qMail.Listen(callbackMail)
 
-	wg.Done()
 }
 
 func RunUserQueue(wg *sync.WaitGroup) {
@@ -119,7 +117,7 @@ func AddValuesIntoRedis() {
 			log.Fatalln(err)
 		}
 
-		time.Sleep(time.Microsecond)
+		// time.Sleep(time.Millisecond * 500)
 	}
 }
 
@@ -128,18 +126,8 @@ func ProcessValues() {
 }
 
 func main() {
+	fmt.Println("Running main")
 	// AddValuesIntoRedis()
-
-	// rdb := redis.NewClient(&redis.Options{
-	// 	Addr:     "localhost:6379",
-	// 	Password: "", // no password set
-	// 	DB:       0,  // use default DB
-	// })
-
-	// resp := rdb.Keys("mail-queue:*")
-
-	// fmt.Println(resp.Result())
 
 	ProcessValues()
-	// AddValuesIntoRedis()
 }
