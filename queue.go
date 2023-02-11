@@ -90,7 +90,12 @@ func (q *Queue[T]) Enqueue(args T) error {
 	}
 
 	resp := q.redis.RPush(q.name, valueToAdd)
-	return resp.Err()
+
+	if resp.Err() != nil {
+		return resp.Err()
+	}
+
+	return nil
 }
 
 // Desenfileira um item.
@@ -156,19 +161,23 @@ func (q *Queue[T]) Dequeue(callback CallbackFunc[T]) error {
 func (q *Queue[T]) Listen(callback CallbackFunc[T]) {
 	log.Printf("Running Listen from queue: %s\n", q.name)
 
-	var err error
+	go func() {
+		var err error
 
-	for {
-		for q.redis.LLen(q.name).Val() != 0 {
-			err = q.Dequeue(callback)
-			if err != nil {
-				log.Println(err)
-				break
+		for {
+			redisLen := q.redis.LLen(q.name).Val()
+
+			for redisLen > 0 {
+				err = q.Dequeue(callback)
+				if err != nil {
+					log.Println(err)
+					continue
+				}
+				redisLen--
 			}
-			time.Sleep(time.Second / 2)
+			time.Sleep(time.Second * 10)
 		}
-		time.Sleep(time.Second * 10)
-	}
+	}()
 }
 
 type ProcessableFunc func(wg *sync.WaitGroup)

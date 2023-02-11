@@ -61,7 +61,6 @@ func RunMailQueue(wg *sync.WaitGroup) {
 
 	qMail.Listen(callbackMail)
 
-	wg.Done()
 }
 
 func RunUserQueue(wg *sync.WaitGroup) {
@@ -119,7 +118,7 @@ func AddValuesIntoRedis() {
 			log.Fatalln(err)
 		}
 
-		time.Sleep(time.Microsecond)
+		// time.Sleep(time.Millisecond * 500)
 	}
 }
 
@@ -128,18 +127,26 @@ func ProcessValues() {
 }
 
 func main() {
+	fmt.Println("Running main")
 	// AddValuesIntoRedis()
+	// ProcessValues()
+	qm := NewMailQueue()
 
-	// rdb := redis.NewClient(&redis.Options{
-	// 	Addr:     "localhost:6379",
-	// 	Password: "", // no password set
-	// 	DB:       0,  // use default DB
-	// })
+	err := qm.Enqueue(MailOpts{To: []string{"gustavo@email.com"}})
 
-	// resp := rdb.Keys("mail-queue:*")
+	if err != nil {
+		log.Fatalln(err)
+	}
 
-	// fmt.Println(resp.Result())
+	callbackMail := func(args MailOpts) error {
+		fmt.Printf("Sending email to %s\n", args.To)
 
-	ProcessValues()
-	// AddValuesIntoRedis()
+		return nil
+	}
+
+	qm.Listen(callbackMail)
+
+	for {
+		time.Sleep(time.Hour)
+	}
 }
