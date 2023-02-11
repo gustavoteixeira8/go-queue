@@ -167,7 +167,7 @@ func (q *Queue[T]) Listen(callback CallbackFunc[T]) {
 		for {
 			redisLen := q.redis.LLen(q.name).Val()
 
-			for redisLen != 0 {
+			for redisLen > 0 {
 				err = q.Dequeue(callback)
 				if err != nil {
 					log.Println(err)
