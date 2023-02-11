@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"sync"
+	"time"
 
 	"github.com/go-redis/redis"
 	queue "github.com/gustavoteixeira8/go-queue"
@@ -128,6 +129,24 @@ func ProcessValues() {
 func main() {
 	fmt.Println("Running main")
 	// AddValuesIntoRedis()
+	// ProcessValues()
+	qm := NewMailQueue()
 
-	ProcessValues()
+	err := qm.Enqueue(MailOpts{To: []string{"gustavo@email.com"}})
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	callbackMail := func(args MailOpts) error {
+		fmt.Printf("Sending email to %s\n", args.To)
+
+		return nil
+	}
+
+	qm.Listen(callbackMail)
+
+	for {
+		time.Sleep(time.Hour)
+	}
 }
