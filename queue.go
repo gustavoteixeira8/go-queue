@@ -159,7 +159,7 @@ func (q *Queue[T]) Dequeue(callback CallbackFunc[T]) error {
 // Verifica se existe algum item na fila a cada 10 segundos.
 // Se existir, essa função chamará a função Queue.Dequeue(callback CallbackFunc[T])
 func (q *Queue[T]) Listen(callback CallbackFunc[T]) {
-	log.Printf("Running Listen from queue: %s\n", q.name)
+	log.Printf("Listening queue: %s\n", q.name)
 
 	go func() {
 		var err error
